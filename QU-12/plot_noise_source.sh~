@@ -1,0 +1,9 @@
+#!/bin/bash
+cycle=$1
+
+if [ $# -eq 0 ];then
+    echo "./plot_noise_source.sh <cycle_number>"
+    exit
+fi
+mkdir -p ${cycle}/picture
+root -l 'plot_noise_source.cpp('${cycle}')'

@@ -9,7 +9,14 @@ int bump_crush_number(const char* module="QU-12",Int_t cycle_max=35){
   const Int_t measure_num=cycle_max/5+1;  
   Int_t bump_crush_pixels[measure_num];
   Int_t cycle[measure_num];
+  Int_t cycle2[measure_num-1];
+  Int_t pixels_diff[measure_num-1];
   for(Int_t i=0;i<measure_num;i++){
+    if(i<measure_num-1){
+      cycle2[i]=0;
+      pixels_diff[i]=0;
+      cycle2[i]=(i+1)*5;
+    }
     bump_crush_pixels[i]=0;
     cycle[i]=0;
     cycle[i]=i*5;
@@ -17,11 +24,23 @@ int bump_crush_number(const char* module="QU-12",Int_t cycle_max=35){
     TTree*maps=(TTree*)datafile->Get("maps");
     bump_crush_pixels[i]=maps->GetEntries(hit0&&mask_cut);
     
+    if(i>0){
+      pixels_diff[i]=bump_crush_pixels[i]-bump_crush_pixels[i-1];
+    }
     delete maps;
     datafile->Close();
   }  
+  TCanvas*bump_crush_canvas=new TCanvas("bump_crush_canvas","");
   TGraph*graph=new TGraph(measure_num,cycle,bump_crush_pixels);
   graph->Draw();
-  graph->SetTitle("bump_crush_pixels# ;pixels# ;cycle_num");
+  graph->SetTitle("bump_crush_pixels# ;cycle_num;pixel#");
+
+  TCanvas*bump_crush_diff_canvas=new TCanvas("bump_crush_diff_canvas","");
+  TGraph*graph2=new TGraph(measure_num-1,cycle2,pixels_diff);
+  graph2->Draw();
+  graph2->SetTitle("bump_crush_diff_pixels# ;cycle_num;pixel#");
+
+  bump_crush_canvas->Print(Form("%s/bump_crush_pixels.pdf(",module));
+  bump_crush_diff_canvas->Print(Form("%s/bump_crush_pixels.pdf)",module));
   return 0;
 }

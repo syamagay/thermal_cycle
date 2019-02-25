@@ -1,11 +1,18 @@
-int plot_noise_source(const char* module="QU-12",Int_t cycle=0){
+#include <TFile.h>
+#include <TCanvas.h>
+#include <TH2D.h>
+#include <TH1D.h>
+#include <TTree.h>
+#include <TCut.h>
+
+int plot_noise_source(const char* module="QU-12",Int_t cycle=0,Int_t save=0){
   //  Int_t cycle=0;
   Int_t noise_threshold_right=160;
   Int_t noise_threshold_left=160;
   Int_t column_max=161;
   Int_t row_max=673;
   
-  TFile*cycle_file=new TFile(Form("%s/%dc/data.root",module,cycle));
+  TFile*cycle_file=new TFile(Form("%s/%dc/data.root",module,cycle),"Update");
   TTree*maps=(TTree*)cycle_file->Get("maps");
   TH2D*Occupancy_map=(TH2D*)cycle_file->Get("Occupancy_map");
   TH2D*Dead_pixels_map=(TH2D*)cycle_file->Get("Dead_pixels_map");
@@ -13,26 +20,33 @@ int plot_noise_source(const char* module="QU-12",Int_t cycle=0){
   TH2D*Low_noise_and_no_hits_pixels_map=(TH2D*)cycle_file->Get("Low_noise_and_no_hits_pixels_map");
   TH2D*Noise_map=(TH2D*)cycle_file->Get("Noise_map"); 
   //  TH1D*Hits_of_pixels=(TH1D*)cycle_file->Get("#' 'of' 'pixels");
-  /*
+
   TCanvas*basic_information=new TCanvas("basic_information","");
   Occupancy_map->Draw("colz");
-  basic_information->Print(Form("%dc/picture/basic_information.pdf[",cycle));
-  basic_information->Print(Form("%dc/picture/basic_information.pdf",cycle)); 
+  basic_information->Print(Form("%s/%dc/picture/basic_information.pdf[",module,cycle));
+  basic_information->Print(Form("%s/%dc/picture/basic_information.pdf",module,cycle)); 
   Dead_pixels_map->Draw("colz");
-  basic_information->Print(Form("%dc/picture/basic_information.pdf",cycle));
+  basic_information->Print(Form("%s/%dc/picture/basic_information.pdf",module,cycle));
   Noisy_pixels_map->Draw("colz");
-  basic_information->Print(Form("%dc/picture/basic_information.pdf",cycle));
+  basic_information->Print(Form("%s/%dc/picture/basic_information.pdf",module,cycle));
   Low_noise_and_no_hits_pixels_map->Draw("colz");
-  basic_information->Print(Form("%dc/picture/basic_information.pdf",cycle));
+  basic_information->Print(Form("%s/%dc/picture/basic_information.pdf",module,cycle));
   Noise_map->SetMaximum(1000);
   Noise_map->Draw("colz");
-  basic_information->Print(Form("%dc/picture/basic_information.pdf",cycle));
+  basic_information->Print(Form("%s/%dc/picture/basic_information.pdf",module,cycle));
   //  Hits_of_pixels->Draw();
-  //basic_information->Print(Form("%dc/picture/basic_information.pdf",cycle));
-  basic_information->Print(Form("%dc/picture/basic_information.pdf]",cycle));
-  */
+  //basic_information->Print(Form("%dc/picture/basic_information.pdf",module,cycle));
+  basic_information->Print(Form("%s/%dc/picture/basic_information.pdf]",module,cycle));
+  delete basic_information;
+  
+  delete Dead_pixels_map;
+  delete Noisy_pixels_map;
+  delete Low_noise_and_no_hits_pixels_map;
+  delete Noise_map;
+
+  
   TCanvas*occupancy_canvas=new TCanvas("occupancy_canvas","");
-  Occupancy_map->SetMaximum(20);
+  Occupancy_map->SetMaximum(200);
   Occupancy_map->Draw("colz");
 
   TCut map_left="chip==1||chip==3";
@@ -54,22 +68,22 @@ int plot_noise_source(const char* module="QU-12",Int_t cycle=0){
   TCanvas*noise_dis_right=new TCanvas("noise_dif_right","");
   TCanvas*bump_crush_canvas=new TCanvas("bump_crush_canvas","");
   TCanvas*noise_0_canvas=new TCanvas("noise_0_canvas","");
-  //TCanvas*test_map_canvas=new TCanvas("test_map_canvas","");
+  TCanvas*test_map_canvas=new TCanvas("test_map_canvas","");
   
   TH1D*noise_distribution_left=new TH1D("noise_distribution_left",Form("noise_distribution_left(%dcycle);pixels#;noise[e-]",cycle),100,0,500);
-  TH1D*noise_hit0_left=new TH1D("noise_hit0_left","noise_hit0_left;pixels#;noise[e-]",100,0,500);
-  TH1D*noise_distribution_right=new TH1D("noise_distribution_right",Form("noise_distribution_right(%dcycle);pixels#;noise[e-]",cycle),100,0,500);
-  TH1D*noise_hit0_right=new TH1D("noise_hit0_right","noise_hit0_right;pixels#;noise[e-]",100,0,500);
+  TH1D*noise_hit0_left=new TH1D("noise_hit0_left","noise_hit0_left;noise[e-];pixels",100,0,500);
+  TH1D*noise_distribution_right=new TH1D("noise_distribution_right",Form("noise_distribution_right(%dcycle);noise[e-];pixels#",cycle),100,0,500);
+  TH1D*noise_hit0_right=new TH1D("noise_hit0_right","noise_hit0_right;noise[e-];pixels",100,0,500);
   noise_hit0_left->SetFillColor(kRed);
   noise_hit0_right->SetFillColor(kRed);
 
   noise_dis_left->cd();
   maps->Draw("noise>>noise_distribution_left",map_left&&mask);
-  maps->Draw("noise>>noise_hit0_left",map_hit0_left&&mask,"same");
+  maps->Draw("noise>>noise_hit0_left",map_hit0_left&&mask,"sames");
   noise_dis_left->SetLogy();
   noise_dis_right->cd();
   maps->Draw("noise>>noise_distribution_right",map_right&&mask);
-  maps->Draw("noise>>noise_hit0_right",map_hit0_right&&mask,"same");
+  maps->Draw("noise>>noise_hit0_right",map_hit0_right&&mask,"sames");
   noise_dis_right->SetLogy();
 
   TH1D*noise_diff_left=new TH1D("noise_diff_left","",100,-200,200);
@@ -82,29 +96,29 @@ int plot_noise_source(const char* module="QU-12",Int_t cycle=0){
   noise_diff_left_canvas->SetLogy();
   noise_diff_hit0_left->SetFillColor(kRed);
   maps->Draw("noise_hv0-noise>>noise_diff_left",map_left&&mask);
-  maps->Draw("noise_hv0-noise>>noise_diff_hit0_left",map_hit0_left&&mask,"same");
+  maps->Draw("noise_hv0-noise>>noise_diff_hit0_left",map_hit0_left&&mask,"sames");
   noise_diff_right_canvas->cd();
   noise_diff_right_canvas->SetLogy();
   noise_diff_hit0_right->SetFillColor(kRed);
   maps->Draw("noise_hv0-noise>>noise_diff_right",map_right&&mask);
-  maps->Draw("noise_hv0-noise>>noise_diff_hit0_right",map_hit0_right&&mask,"same");
+  maps->Draw("noise_hv0-noise>>noise_diff_hit0_right",map_hit0_right&&mask,"sames");
     
   TCanvas*noise_hv0_left_canvas=new TCanvas("noise_hv0_left_canvas","");
   TCanvas*noise_hv0_right_canvas=new TCanvas("noise_hv0_right_canvas","");
   //TCanvas*test_map_canvas=new TCanvas("test_map_canvas","");
-  TH1D*noise_hv0_left=new TH1D("noise_hv0_left",Form("noise_hv0_left(%dcycle);pixels#;noise[e-]",cycle),100,0,500);
-  TH1D*noise_hv0_hit0_left=new TH1D("noise_hv0_hit0_left","noise_hv0_hit0_left;pixels#;noise[e-]",100,0,500);
-  TH1D*noise_hv0_right=new TH1D("noise_hv0_right",Form("noise_distribution_right(%dcycle);pixels#;noise[e-]",cycle),100,0,500);
-  TH1D*noise_hv0_hit0_right=new TH1D("noise_hv0_hit0_right","noise_hit0_right;pixels#;noise[e-]",100,0,500);
+  TH1D*noise_hv0_left=new TH1D("noise_hv0_left",Form("noise_hv0_left(%dcycle);noise[e-];pixels#",cycle),100,0,500);
+  TH1D*noise_hv0_hit0_left=new TH1D("noise_hv0_hit0_left","noise_hv0_hit0_left;noise[e-];pixels#",100,0,500);
+  TH1D*noise_hv0_right=new TH1D("noise_hv0_right",Form("noise_distribution_right(%dcycle);noise[e-];pixels#",cycle),100,0,500);
+  TH1D*noise_hv0_hit0_right=new TH1D("noise_hv0_hit0_right","noise_hit0_right;noise[e-];pixels#",100,0,500);
   noise_hv0_left_canvas->cd();
   noise_hv0_hit0_left->SetFillColor(kRed);
   maps->Draw("noise_hv0>>noise_hv0_left",map_left&&mask);
-  maps->Draw("noise_hv0>>noise_hv0_hit0_left",map_hit0_left&&mask,"same");
+  maps->Draw("noise_hv0>>noise_hv0_hit0_left",map_hit0_left&&mask,"sames");
   noise_hv0_left_canvas->SetLogy();
   noise_hv0_right_canvas->cd();
   noise_hv0_hit0_right->SetFillColor(kRed);
   maps->Draw("noise_hv0>>noise_hv0_right",map_right&&mask);
-  maps->Draw("noise_hv0>>noise_hv0_hit0_right",map_hit0_right&&mask,"same");
+  maps->Draw("noise_hv0>>noise_hv0_hit0_right",map_hit0_right&&mask,"sames");
   noise_hv0_right_canvas->SetLogy(); 
 
   Int_t totalpixels = maps->GetEntries();
@@ -128,20 +142,34 @@ int plot_noise_source(const char* module="QU-12",Int_t cycle=0){
   maps->SetBranchAddress("noise_hv0",&noise_hv0);
   maps->SetBranchAddress("sumocp",&sumocp);
 
+  Int_t COLUMN=0;
+  Int_t ROW=0;
+  TTree*new_maps=new TTree("new_maps","");
+  new_maps->Branch("chip",&chip,"chip/I");
+  new_maps->Branch("column",&COLUMN,"COLUMN/I");
+  new_maps->Branch("row",&ROW,"ROW/I");
+  new_maps->Branch("enable",&enable,"enable/I");
+  new_maps->Branch("dead",&dead,"dead/I");
+  new_maps->Branch("noisy",&noisy,"noisy/I");
+  new_maps->Branch("noise",&noise,"noise/F");
+  new_maps->Branch("noise_hv0",&noise_hv0,"noise_hv0/F");
+  new_maps->Branch("sumocp",&sumocp,"sumocp/I");  
+
   TCanvas*enable_canvas=new TCanvas("enable_canvas","");
 
-  TH2D*bump_crush_map=new TH2D("bump_crush_map","bump_crush_map;Column;Row",column_max-1,0,column_max,row_max-1,0,row_max);
+  TH2D*bump_crush_map=new TH2D("bump_crush_map",Form("bump_crush_map(%dcycle);Column;Row",cycle),column_max-1,0,column_max,row_max-1,0,row_max);
+  TH2D*hit0_highnoise_map=new TH2D("hit0_highnoise_map",Form("hit0_highnoise_map(%dcycle);Column;Row",cycle),column_max-1,0,column_max,row_max-1,0,row_max);
   TH2D*noise_0_map=new TH2D("noise_0_map","noise_0_map;Column;Row",column_max-1,0,column_max,row_max-1,0,row_max);
   TH2D*noise_diff_map=new TH2D("noise_diff_map","noise_diff_map;Column;Row",column_max-1,0,column_max,row_max-1,0,row_max);
   TH2D*map=new TH2D("map","map;Column;Row",column_max-1,0,column_max,row_max-1,0,row_max);  
   TH2D*enable_map=new TH2D("enable_map","enablemap;Column;Row",column_max-1,0,column_max,row_max-1,0,row_max);
   bump_crush_map->SetMaximum(2);
+  hit0_highnoise_map->SetMaximum(2);
   noise_0_map->SetMaximum(2); 
   noise_diff_map->SetMaximum(2); 
   map->SetMaximum(2);
   enable_map->SetMaximum(2);
-  Int_t COLUMN=0;
-  Int_t ROW=0;
+
   for(Int_t i=0;i<totalpixels;i++){
     maps->GetEntry(i);
     if(chip==1||chip==3){
@@ -150,35 +178,52 @@ int plot_noise_source(const char* module="QU-12",Int_t cycle=0){
     else if(chip==2||chip==4){
       threshold = noise_threshold_right;
     }
-    COLUMN = column + 80*((chip-1)%2);
-    ROW = row + 336*(chip>2);
+    if(chip==1||chip==2){
+      COLUMN = 80*chip - column +1;
+      ROW = 336 - row +1;
+    }
+    else if(chip==3||chip==4){
+      COLUMN = column + 80*((chip-1)%2);
+      ROW = row + 336*(chip>2);
+    }
     if(sumocp==0&&enable==1&&dead==1&&noisy==1){
       bump_crush_map->Fill(COLUMN,ROW);
-    }    
+    }
+    if(sumocp==0&&enable==1&&dead==1&&noisy==1&&noise>150){
+      hit0_highnoise_map->Fill(COLUMN,ROW);
+    }
     if(noise<10){
       noise_0_map->Fill(COLUMN,ROW);
     }
-    if(chip==1){
-    map->Fill(COLUMN,ROW);
-    }
+    
+    map->Fill(COLUMN,ROW,sumocp);
+    
     if(noise_hv0-noise>-100&&noise_hv0-noise<100&&sumocp==0&&enable==1&&dead==1&&noisy==1){
       noise_diff_map->Fill(COLUMN,ROW);
     }
     if(enable==0){
       enable_map->Fill(COLUMN,ROW);
     }
+    new_maps->Fill();
   }
+  if(save==1){
+    new_maps->Write();
+  }
+  hit0_highnoise_map->Draw("colz");
+  hit0_highnoise_map->SetStats(0);
+
   bump_crush_canvas->cd();
   bump_crush_map->Draw("colz");
   bump_crush_map->SetStats(0);
+
   noise_0_canvas->cd();
   noise_0_map->Draw("colz");
 
   enable_canvas->cd();
   enable_map->Draw("colz");
   
-  //  test_map_canvas->cd();
-  // map->Draw("colz");
+  test_map_canvas->cd();
+  map->Draw("colz");
 
   TCanvas*noise_hv0_canvas=new TCanvas("noise_hv0_canvas","");
   noise_diff_map->Draw("colz");  
@@ -207,5 +252,6 @@ int plot_noise_source(const char* module="QU-12",Int_t cycle=0){
   //  cycle_file->Close();
 
   TCanvas*newcanvas=new TCanvas("newcanvas","");
+  //maps->Draw("row:column>>h(80,1,81,336,1,337)","sumocp==0&&noise>160","colz");
   return 0;
 }

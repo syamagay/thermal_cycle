@@ -1,0 +1,81 @@
+#include <TFile.h>
+#include <TChain.h>
+#include <iostream>
+#include <stdio.h>
+int pixels_of_cycles(const char* module="QU-12",const int file_num=7){
+  //const int num = (cycle_max + 5)/5;
+  const int measure_num = 20;
+  TFile*data_of_each_cycle=new TFile("data_of_each_cycle.root","recreate");
+  TTree*maps_tree=new TTree("maps_tree","");
+  const int chip_num=4;
+  const int column_max=80;
+  const int row_max=336;
+  
+  Int_t chip=0;
+  Int_t column=0;
+  Int_t row=0;
+  Int_t enable[measure_num]={};
+  Int_t dead[measure_num]={};
+  Int_t noisy[measure_num]={0};
+  Float_t noise[measure_num]={0};
+  Float_t noise_hv0[measure_num]={0};
+  Int_t sumocp[measure_num]={0};
+  
+  maps_tree->Branch("chip",&chip,"chip/I");
+  maps_tree->Branch("column",&column,"column/I");
+  maps_tree->Branch("row",&row,"row/I");
+  maps_tree->Branch("enable",enable,Form("enable[%d]/I",measure_num));
+  maps_tree->Branch("dead",dead,Form("dead[%d]/I",measure_num));  
+  maps_tree->Branch("noisy",noisy,Form("noisy[%d]/I",measure_num));
+  maps_tree->Branch("noise",noise,Form("noise[%d]/F",measure_num));
+  maps_tree->Branch("noise_hv0",noise_hv0,Form("noise_hv0[%d]/F",measure_num));
+  maps_tree->Branch("sumocp",sumocp,Form("sumocp[%d]/I",measure_num));
+  
+  Int_t ENABLE=0;
+  Int_t DEAD=0;
+  Int_t NOISY=0;
+  Int_t SUMOCP=0;
+  Float_t NOISE=0;
+  Float_t NOISE_HV0=0;
+  
+  Int_t cycle=0;
+  Int_t Entries_one_cycle=0;
+  TChain*maps=new TChain("maps","");
+  for(Int_t i=0;i<file_num;i++){
+    cycle=i*5;
+    maps->Add(Form("%s/%dc/data.root",module,cycle));
+    if(i==0){
+      Entries_one_cycle=maps->GetEntries();
+    }
+  }
+
+  maps->SetBranchAddress("chip",&chip);
+  maps->SetBranchAddress("row",&row);
+  maps->SetBranchAddress("column",&column);
+  maps->SetBranchAddress("enable",&ENABLE);
+  maps->SetBranchAddress("dead",&DEAD);
+  maps->SetBranchAddress("noisy",&NOISY);
+  maps->SetBranchAddress("noise",&NOISE);
+  maps->SetBranchAddress("noise_hv0",&NOISE_HV0);
+  maps->SetBranchAddress("sumocp",&SUMOCP);
+
+  /*  
+  for(Int_t iEntry=0;iEntry<Entries_one_cycle;iEntry++){
+    std::cout << iEntry << std::endl;
+    for(Int_t i=0;i<measure_num;i++){      
+      maps->GetEntry(iEntry+Entries_one_cycle*i);
+      enable[i]=ENABLE;
+      dead[i]=DEAD;
+      noisy[i]=NOISY;
+      noise[i]=NOISE;
+      noise_hv0[i]=NOISE_HV0;
+      sumocp[i]=SUMOCP;
+    }
+    maps_tree->Fill();
+  }
+  */
+  
+  data_of_each_cycle->cd();
+  maps_tree->Write();
+  return 0;
+}

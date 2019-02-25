@@ -1,0 +1,4 @@
+
+# DO NOT DELETE
+./test_cpp.so: /Users/yamagaya/local/root/root_v6.12.06/include/RVersion.h /Users/yamagaya/local/root/root_v6.12.06/include/RConfig.h /Users/yamagaya/local/root/root_v6.12.06/include/TClass.h /Users/yamagaya/local/root/root_v6.12.06/include/TDictAttributeMap.h /Users/yamagaya/local/root/root_v6.12.06/include/TInterpreter.h /Users/yamagaya/local/root/root_v6.12.06/include/TROOT.h /Users/yamagaya/local/root/root_v6.12.06/include/TBuffer.h /Users/yamagaya/local/root/root_v6.12.06/include/TMemberInspector.h /Users/yamagaya/local/root/root_v6.12.06/include/TError.h /Users/yamagaya/local/root/root_v6.12.06/include/RtypesImp.h /Users/yamagaya/local/root/root_v6.12.06/include/TIsAProxy.h /Users/yamagaya/local/root/root_v6.12.06/include/TFileMergeInfo.h /Users/yamagaya/local/root/root_v6.12.06/include/TCollectionProxyInfo.h /Users/yamagaya/local/root/pro/bin/rootcling
+test_cpp__ROOTBUILDVERSION= 6.12/06

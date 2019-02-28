@@ -3,6 +3,7 @@ module=$1
 
 if [ $# -lt 1 ];then
     echo "Usage : ./bump_crush_number.sh <module>"
+    exit
 fi
 cycle_max=0
 measure_num=0

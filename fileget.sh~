@@ -9,7 +9,12 @@ fi
 
 mkdir -p ${mod_id}/${cycle_num}c/picture
 sftp atlas-q@192.168.10.76 <<EOF
-cd work/KC705/working_fusy/thermal_cycle_analysis/${mod_id}/${cycle_num}c
+cd work/KC705/working_fusy/thermal_cycle_analysis
+
+get copylog/${mod_id}_copylog.xlsx ${mod_id}
+
+cd ${mod_id}/${cycle_num}c
 get data.root ${mod_id}/${cycle_num}c/
+get *png ${mod_id}/${cycle_num}c/
 exit
 EOF

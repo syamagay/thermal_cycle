@@ -1,4 +1,4 @@
-int bump_crush_number(const char* module="QU-12",Int_t cycle_max=35){
+int bump_crush_number(const char* module="QU-12",Int_t _Measure_NUM=35){
   TCut enable_cut = "enable==1";
   TCut noisy_cut = "noisy==1";
   TCut dead_cut = "dead==1";
@@ -6,20 +6,30 @@ int bump_crush_number(const char* module="QU-12",Int_t cycle_max=35){
   TCut mask_cut=enable_cut&&noisy_cut&&dead_cut;
   TCut hit0 = "sumocp==0";
   
-  const Int_t measure_num=cycle_max/5+1;  
+  //  const Int_t measure_num=cycle_max/5+1;  
+  const Int_t measure_num=_Measure_NUM;
   Int_t bump_crush_pixels[measure_num];
   Int_t cycle[measure_num];
   Int_t cycle2[measure_num-1];
   Int_t pixels_diff[measure_num-1];
   for(Int_t i=0;i<measure_num;i++){
-    if(i<measure_num-1){
-      cycle2[i]=0;
-      pixels_diff[i]=0;
-      cycle2[i]=(i+1)*5;
-    }
     bump_crush_pixels[i]=0;
     cycle[i]=0;
-    cycle[i]=i*5;
+    if(i>0){
+      if(cycle[i-1]==85){
+	cycle[i]=cycle[i-1]+15;
+      }
+      else if(cycle[i-1]>99){
+	cycle[i]=cycle[i-1]+20;
+      }
+      else{
+	cycle[i]=i*5;
+      }
+      cycle2[i-1]=0;
+      pixels_diff[i-1]=0;
+      cycle2[i-1]=cycle[i];
+    }
+    std::cout << cycle[i] << std::endl;
     TFile*datafile=new TFile(Form("%s/%dc/data.root",module,cycle[i]));
     TTree*maps=(TTree*)datafile->Get("maps");
     bump_crush_pixels[i]=maps->GetEntries(hit0&&mask_cut);
